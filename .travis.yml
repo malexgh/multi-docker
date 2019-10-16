@@ -13,8 +13,24 @@ after_success:
   - docker build -t malexgh/multi-nginx ./nginx
   - docker build -t malexgh/multi-server ./server
   - docker build -t malexgh/multi-worker ./worker
+  # Log in to the docker CLI
   - echo "$DOCKER_PWD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push the images to docker hub
   - docker push malexgh/multi-client
   - docker push malexgh/multi-nginx
   - docker push malexgh/multi-server
   - docker push malexgh/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-east-2"
+  app: "multi-docker"
+  env: "MultiDocker-env"
+  bucket_name: "elasticbeanstalk-us-east-2-566057188743"
+  bucket_path: "docker-multi"
+  on:
+    branch: master
+  access_key_id:
+    secure: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY

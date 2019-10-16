@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t malexgh/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true malexgh/react-test npm test
+
+after_success:
+  - docker build -t malexgh/multi-client ./client
+  - docker build -t malexgh/multi-nginx ./nginx
+  - docker build -t malexgh/multi-server ./server
+  - docker build -t malexgh/multi-worker ./worker
+  - echo "$DOCKER_PWD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push malexgh/multi-client
+  - docker push malexgh/multi-nginx
+  - docker push malexgh/multi-server
+  - docker push malexgh/multi-worker
